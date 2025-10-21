@@ -307,7 +307,7 @@ void gimbalc::SetWithRC(void)
 				lost_timer = 0;
 
 				if (vision_packet.id != last_id){ //上位机发来的ID更新
-					// //更正上位机发来的偏移量
+					// //更正上位机1发来的偏移量
 					// if(vision_packet.offset_yaw>284) vision_packet.offset_yaw -= 360;
 					// if(vision_packet.offset_yaw<-284) vision_packet.offset_yaw += 360;
 
@@ -333,20 +333,17 @@ void gimbalc::SetWithRC(void)
 			}
 			else //按了自瞄，但上位机没有看到目标，控制指令control=0
 			{
-			//	YawTarget = motors[0].Motor_Angle;
-				//PihTarget = motors[1].Motor_Angle;
+
 				lost_timer++;
 			}
 			if (lost_timer >= 7)
 			{
 				vision_packet.shoot = 0;
 				lost_timer = 0;
-
 			}
 		}
 
-		//YawTarget限幅
-		//不论哪种模式都进行YawTarget限幅，避免疯转 -- 关闭自瞄之后遥控器暂时失灵导致偏移量累积??
+		//YawTarget限幅，避免疯转
 		if (YawTarget - motors[0].Motor_Angle > 80) YawTarget = motors[0].Motor_Angle + 80;
 		if (YawTarget - motors[0].Motor_Angle < -80) YawTarget = motors[0].Motor_Angle - 80;
 	}
@@ -367,8 +364,7 @@ void gimbalc::SetWithRC(void)
 		YawSMC.J =0.74;
 		YawSMC.C = 10;
 		if (vision_packet.control == 0) { //上位机没有检测到装甲板
-			//YawTarget = motors[0].Motor_Angle + 2.2;
-		//	PihTarget = motors[1].Motor_Angle;
+
 		}
 		else {
 			YawTarget = vision_packet.offset_yaw + motors[0].Motor_Angle;
@@ -449,7 +445,7 @@ void gimbalc::CurrentCompute()
 		break;
 	}
 
-	// can.ShootSendCurrent(shoot.speed_pids[1].Out,shoot.speed_pids[2].Out,shoot.speed_pids[0].Out,0);
+	can.ShootSendCurrent(shoot.speed_pids[1].Out,shoot.speed_pids[2].Out,shoot.speed_pids[0].Out,0);
 }
 
 //matlab生成控制器 先用一个大循环，后期移植到task
@@ -467,8 +463,7 @@ void gimbalc::ControlLoop()
 void gimbalc::Printf_Test(void)
 {
 	//if (MyRemote.portIsZimiao() == 1) usart_printf("111\r\n");
-	//usart_printf("%.2f ,%.2f, %.2f \r\n"ChassisYawPid., YawTarget, motors[0].Motor_Angle);
-	usart_printf("%.2f, %.2f, %.2f, %.2f\r\n", YawTarget, motors[0].Motor_Angle, YawTarget - motors[0].Motor_Angle,vision_packet.offset_yaw);
+	//usart_printf("%.2f, %.2f, %.2f, %.2f\r\n", YawTarget, motors[0].Motor_Angle, YawTarget - motors[0].Motor_Angle,vision_packet.offset_yaw);
 	//usart_printf("%.2f %.2f %.2f\r\n",vision_packet.offset_pitch, last_offset_pitch, PihTarget);
 	//usart_printf("%.2f\r\n",motors[1].Angle_Ecd);
 	//usart_printf("%d \r\n", MyRemote.rc_ctrl.rc.mode_sw);

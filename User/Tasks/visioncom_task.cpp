@@ -115,6 +115,7 @@ void VisionComTask(void const* argument)
 }
 
 //新增数据包打印函数（调试用）
+/*
 void print_packet_debug(const uint8_t* packet_data, size_t packet_size) {
     char debug_msg[100];
     char hex_buf[4];
@@ -130,6 +131,7 @@ void print_packet_debug(const uint8_t* packet_data, size_t packet_size) {
     }
     HAL_UART_Transmit(&huart1, (uint8_t*)"\r\n", 4, 100);
 }
+*/
 /*
 //使用方法：
 #include "visioncom_task.h"

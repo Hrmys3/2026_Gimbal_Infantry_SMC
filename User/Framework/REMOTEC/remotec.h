@@ -58,7 +58,7 @@ typedef __packed struct
 	__packed struct
 	{
 		int16_t ch[4];//摇杆
-		uint8_t mode_sw;//中间三档开关
+		uint8_t mode_sw;//中间三档开关 目前自左向右为小陀螺、随动、急停
 		uint8_t stop;//暂停键
 		uint8_t left_button;//fn;
 		uint8_t	right_button;
