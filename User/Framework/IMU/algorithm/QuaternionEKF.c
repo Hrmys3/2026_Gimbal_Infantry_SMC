@@ -113,11 +113,13 @@ void IMU_QuaternionEKF_Update(float gx, float gy, float gz, float ax, float ay, 
     */
     QEKF_INS.dt = dt;
 
+    //获取去除零偏后的角速度
     QEKF_INS.Gyro[0] = gx - QEKF_INS.GyroBias[0];
     QEKF_INS.Gyro[1] = gy - QEKF_INS.GyroBias[1];
     QEKF_INS.Gyro[2] = gz - QEKF_INS.GyroBias[2];
 
-    // set F
+    // set F 构建状态转移矩阵 F
+    //矩阵F左上角的4x4部分根据角速度进行了更新
     halfgxdt = 0.5f * QEKF_INS.Gyro[0] * dt;
     halfgydt = 0.5f * QEKF_INS.Gyro[1] * dt;
     halfgzdt = 0.5f * QEKF_INS.Gyro[2] * dt;

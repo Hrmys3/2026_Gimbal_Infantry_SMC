@@ -262,7 +262,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
 
-ReceivePacket vision_pkt;
+ReceivePacket vision_packet;
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t* Len)
 {
 	/* USER CODE BEGIN 6 */
@@ -272,7 +272,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t* Len)
 	uint32_t crc = Verify_CRC16_Check_Sum(Buf, sizeof(ReceivePacket)); //crc校验
 	if (crc)
 	{
-		vision_pkt = fromVector(Buf);//校验成功
+		vision_packet = fromVector(Buf);//校验成功
 	}
 	return (USBD_OK);
 	/* USER CODE END 6 */

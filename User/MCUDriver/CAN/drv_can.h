@@ -20,9 +20,9 @@ typedef enum
 	CAN_CHASSIS_VAL_ID = 0x401,
 	CAN_CHASSIS_YAW_ID = 0x402,
 
-	CAN_SHOOT_LEFT_ID = 0x201,
-	CAN_SHOOT_RIGHT_ID = 0x202,
-	CAN_RAMC_ID = 0X203,
+	CAN_FRIC_LEFT_ID = 0x201,
+	CAN_FRIC_RIGHT_ID = 0x202,
+	CAN_RAM_ID = 0X203,
 
 	CAN_SHOOT_SEND_ID = 0x200,
 
@@ -38,28 +38,28 @@ class Motor
 	uint32_t timer = 0;
 
 	//实际控制时用到的变量
-	double Angel_All;
+	double Motor_Angle;
 	double Motor_Speed;
 
-	double Angel_Ecd;
+	double Angle_Ecd;
 	double Speed_Ecd;
-	double Angel_Imu;
+	double Angle_Imu;
 	double Speed_Imu;
 
 	//can反馈获得的数据
-	int16_t Angel;
+	int16_t Angle;
 	int16_t Speed;
 	int16_t Torque;
 	uint8_t Tempture;
 	uint8_t Null;
 
 	//CAN反馈时，连续化用到的变量
-	int64_t MotorAngel_ALL;
-	uint16_t NowAngel;
-	uint16_t LastAngel;
-	int16_t IncreAngel;
+	int64_t MotorAngle_ALL; //这是什么？
+	uint16_t NowAngle;
+	uint16_t LastAngle;
+	int16_t IncreAngle;
 
-	uint8_t Which_Mode; //反馈模式
+	uint8_t Feedback_Mode; //反馈模式
 	uint8_t Algorithml; //控制算法
 	CAN_HandleTypeDef *CAN_Line = &hcan1; //CAN1 还是 CAN2
 	float Ratio = 19.0f; //减速比
@@ -67,30 +67,30 @@ class Motor
 	int8_t pole = 1; //极性
 	uint16_t ID = 0x000;
 
-	Motor(uint8_t Which_Mode, uint8_t Algorithml, CAN_HandleTypeDef *CAN_Line,float Ratio ,float EncoderPerCircle, int8_t pole,uint16_t ID):Which_Mode(Which_Mode),Algorithml(Algorithml),CAN_Line(CAN_Line),Ratio(Ratio),EncoderPerCircle(EncoderPerCircle),pole(pole),ID(ID){};
+	Motor(uint8_t Feedback_Mode, uint8_t Algorithml, CAN_HandleTypeDef *CAN_Line,float Ratio ,float EncoderPerCircle, int8_t pole,uint16_t ID):Feedback_Mode(Feedback_Mode),Algorithml(Algorithml),CAN_Line(CAN_Line),Ratio(Ratio),EncoderPerCircle(EncoderPerCircle),pole(pole),ID(ID){};
 	void CanRcvLoop(CAN_HandleTypeDef *hcan,uint32_t Stdid, uint8_t *recvData);
 	void update_angle();
 	void clear();
 //	int *send();
  private:
-	const int16_t ContinueAngelMax = 5000; //角度连续化比较角度
-	int16_t GetEncoderContinueAngel()
+	const int16_t ContinueAngleMax = 5000; //角度连续化比较角度
+	int16_t GetEncoderContinueAngle()
 	{ // 角度连续化，并判断方向
 		int16_t Incre = 0;
-		Incre = NowAngel - LastAngel;
-		if (Incre >= 0 && Incre < ContinueAngelMax)
+		Incre = NowAngle - LastAngle; //单次角度变化量
+		if (Incre >= 0 && Incre < ContinueAngleMax)
 		{ //正转
 			Incre += 0;
 		}
-		if (Incre < -ContinueAngelMax)
+		if (Incre < -ContinueAngleMax)
 		{ //正转，并且不连续
 			Incre += 8192;
 		}
-		if (Incre <= 0 && Incre > -ContinueAngelMax)
+		if (Incre <= 0 && Incre > -ContinueAngleMax)
 		{ //反转
 			Incre += 0;
 		}
-		if (Incre > ContinueAngelMax)
+		if (Incre > ContinueAngleMax)
 		{ //反转，并且不连续
 			Incre -= 8192;
 		}
@@ -111,8 +111,8 @@ class CAN
 	void All_Init();
 	void YawSendCurrent(int16_t current);
 	void PitchSendCurrent(int16_t current);
-	void ChasisSendVal(int16_t vx, int16_t vy, int16_t vz, int8_t car_mode, int8_t is_online);
-	void ChasisSendYaw(int16_t yaw, int16_t pitch,int8_t servo_status,int8_t fric_status,int8_t rammer_status ,int8_t is_redrawing);
+	void ChassisSendCmd(int16_t vx, int16_t vy, int16_t vz, int8_t car_mode, int8_t is_online);
+	void ChassisSendGimbalStatus(int16_t yaw, int16_t pitch,int8_t servo_status,int8_t fric_status,int8_t rammer_status ,int8_t is_redrawing);
 	void ShootSendCurrent(int16_t friLc, int16_t friRc, int16_t ramc, int16_t friUc);
  private:
 	// void Filter_Init(CAN_HandleTypeDef* hcan);

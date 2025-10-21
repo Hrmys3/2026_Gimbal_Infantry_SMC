@@ -8,5 +8,6 @@
 
 void Vision_JudgeUpdate(float shoot_speed, int8_t color, int8_t type);
 void VisionChattingLoop(uint8_t mode);
+void print_packet_debug(const uint8_t* packet_data, size_t packet_size);
 
 #endif //GIMBAL_2023_ABOARD_VISIONCOM_TASK_H

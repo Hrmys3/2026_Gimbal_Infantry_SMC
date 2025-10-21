@@ -11,6 +11,11 @@
 #include "normal_pid.h"
 #include "drv_can.h"
 #include "gimbalc.h"
+#include "packet.hpp"
+
+#define RAM 0
+#define FRIC_L 1
+#define FRIC_R 2
 
 class shootc
 {
@@ -28,9 +33,9 @@ class shootc
 	float SHOOT_SPEED = 6200;
 	Motor motors[3]
 	{
-		{ECD_MODE,NOMEL,&hcan1,36.0,8192.0f,1,CAN_RAMC_ID},
-		{ECD_MODE,NOMEL,&hcan1,1.0,8192.0f,1,CAN_SHOOT_LEFT_ID},
-		{ECD_MODE,NOMEL,&hcan1,1.0,8192.0f,1,CAN_SHOOT_RIGHT_ID}
+		{ECD_MODE,NORMAL,&hcan1,36.0,8192.0f,1,CAN_RAM_ID},
+		{ECD_MODE,NORMAL,&hcan1,1.0,8192.0f,1,CAN_FRIC_LEFT_ID},
+		{ECD_MODE,NORMAL,&hcan1,1.0,8192.0f,1,CAN_FRIC_RIGHT_ID}
 	};
 	NormalPID ram_pos_pid{1.5,0,0.05,300};
 	NormalPID speed_pids[3]
@@ -42,18 +47,18 @@ class shootc
 	shootc();
 	int8_t GetFricStatus(void);
 	void RammerSpeedClean(void);
-	void ShootSpeedClean(void);
-	void ShootSpeedReset();
+	void FricSpeedClean(void);
+	void FricSpeedReset();
 	void SetRammer(void);
  private:
 	int32_t zerobullettimer = 0;
 	float Heat_Cal;
-	void Heat_Calcutate();
+	void Heat_Calculate();
 	void Heat_Protect(void);
 	void Stuck_Check(void);
 	int32_t stack_time = 0;
 	int32_t reverse_time = 0;
-	void ShootSpeedTarget(float Ram_Speed, int8_t mode);
+	void RamSpeedTarget(float Ram_Speed, int8_t mode);
 	void FricControl(void);
 	void Protect_Mode();
 };

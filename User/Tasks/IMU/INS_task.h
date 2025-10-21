@@ -242,7 +242,7 @@ typedef struct
 	float roll;
 } Get_IMUNaiveAngle;
 float IMU_Angle(int8_t Witch_angle);
-float IMU_Speed(int8_t Witch_angle);
+float IMU_Speed(int8_t Which_angle);
 Get_IMUNaiveAngle IMU_NaiveAngle(void);
 extern bool_t IS_IMU_OK;
 //#define X 0

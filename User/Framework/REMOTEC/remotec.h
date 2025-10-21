@@ -116,10 +116,10 @@ void REMOTEC_Init(void);
 class remotec {
  public:
 	//remote control data
-	//遥控器控制变量
+	//遥控控制变量
 	RC_ctrl_t rc_ctrl;
 	uint32_t RC_GetNewData = 0;//检测键值是否在发送/更新
-	uint8_t Control_Mode = RC_MODE;
+	uint8_t Control_Mode = RC_MODE; //一般默认遥控器控制
 	bool is_online = 0;
 
 	void RC_DataHandle();
@@ -129,8 +129,8 @@ class remotec {
 	float vx = 0;
 	float vy = 0;
 //	float vz = 0;
-	int8_t CarMode;
-	int8_t Last_CarMode = SUIDONG;
+	int8_t SportMode;
+	int8_t Last_SportMode = SUIDONG;
 	int8_t ProtectMode ;
 	int8_t Last_ProtectMode = OPENFRIC;
 

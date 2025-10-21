@@ -29,42 +29,42 @@ uint8_t CAN_TxMessage(CAN_HandleTypeDef* hcan, CAN_TxHeaderTypeDef* pHeader, uin
 }
 
 void Motor::clear() {
-    LastAngel = 0;
-    NowAngel = 0;
-    IncreAngel = 0;
-    MotorAngel_ALL = 0;
-    Angel_Ecd = 0;
+    LastAngle = 0;
+    NowAngle = 0;
+    IncreAngle = 0;
+    MotorAngle_ALL = 0;
+    Angle_Ecd = 0;
     Speed_Ecd = 0;
-    Angel_All = 0;
+    Motor_Angle = 0;
     Motor_Speed = 0;
 }
 
 void Motor::update_angle() {
-    LastAngel = NowAngel;
-    NowAngel = Angel;
-    IncreAngel = GetEncoderContinueAngel();
-    MotorAngel_ALL += IncreAngel;
-    Angel_Ecd = MotorAngel_ALL * 360.0f / (EncoderPerCircle * Ratio); //2006 减速比1:36，6020 1:1  3508 1:19，
+    LastAngle = NowAngle;
+    NowAngle = Angle;
+    IncreAngle = GetEncoderContinueAngle();
+    MotorAngle_ALL += IncreAngle;
+    Angle_Ecd = MotorAngle_ALL * 360.0f / (EncoderPerCircle * Ratio); //2006 减速比1:36，6020 1:1  3508 1:19，
     Speed_Ecd = Speed / Ratio;
 
     if (ID == CAN_YAW_RCV_ID) {
-        Angel_Imu = IMU_Angle(1);
+        Angle_Imu = IMU_Angle(1);
         Speed_Imu = IMU_Speed(1);
     } else if (ID == CAN_PIH_RCV_ID) {
-        Angel_Imu = IMU_Angle(2);
+        Angle_Imu = IMU_Angle(2);
         Speed_Imu = IMU_Speed(2);
     } else {
-        Angel_Imu = IMU_Angle(0);
+        Angle_Imu = IMU_Angle(0);
         Speed_Imu = IMU_Speed(0);
     }
 
-    switch (Which_Mode) {
+    switch (Feedback_Mode) {
         case ECD_MODE:
-            Angel_All = Angel_Ecd;
+            Motor_Angle = Angle_Ecd;
             Motor_Speed = Speed_Ecd;
             break;
         case GYR_MODE:
-            Angel_All = Angel_Imu;
+            Motor_Angle = Angle_Imu;
             Motor_Speed = Speed_Imu;
             break;
     }
@@ -84,7 +84,7 @@ void Motor::CanRcvLoop(CAN_HandleTypeDef *hcan,uint32_t Stdid, uint8_t *recvData
         if (Stdid == ID) //在这里接收数据
         {
             is_online = 1;
-            Angel = (int16_t) (recvData[0] << 8 | recvData[1]); // 0~8191
+            Angle = (int16_t) (recvData[0] << 8 | recvData[1]); // 0~8191
             Speed = (int16_t) (recvData[2] << 8 | recvData[3]); // prm
             Torque = (int16_t) (recvData[4] << 8 | recvData[5]); //转矩电流
             Tempture = (int16_t) (recvData[6]); //温度
@@ -167,7 +167,7 @@ void CAN::PitchSendCurrent(int16_t current) {
     CAN_TxMessage(&hcan1, &tx_msg, send_data);
 }
 
-void CAN::ChasisSendVal(int16_t vx, int16_t vy, int16_t vz, int8_t car_mode, int8_t is_online) {
+void CAN::ChassisSendCmd(int16_t vx, int16_t vy, int16_t vz, int8_t car_mode, int8_t is_online) {
     CAN_TxHeaderTypeDef tx_msg;
     uint8_t send_data[8];
     tx_msg.StdId = CAN_CHASSIS_VAL_ID;
@@ -188,7 +188,7 @@ void CAN::ChasisSendVal(int16_t vx, int16_t vy, int16_t vz, int8_t car_mode, int
     CAN_TxMessage(&hcan2, &tx_msg, send_data);
 }
 
-void CAN::ChasisSendYaw(int16_t yaw, int16_t pitch, int8_t servo_status, int8_t fric_status, int8_t rammer_status,
+void CAN::ChassisSendGimbalStatus(int16_t yaw, int16_t pitch, int8_t servo_status, int8_t fric_status, int8_t rammer_status,
                         int8_t is_redrawing) {
     CAN_TxHeaderTypeDef tx_msg;
     uint32_t send_mail_box = 2;

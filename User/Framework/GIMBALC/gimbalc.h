@@ -23,10 +23,8 @@ extern "C" {
 //#define GIMBAL OMNI
 
 //电机反馈选择
-#define ECD_MODE 0
-#define GYR_MODE 1
-#define ZIMIAO_MODE 2
-#define TOKEY_MODE 3
+#define ECD_MODE 0 //ChassisYaw、fric和ram均采用编码器模式
+#define GYR_MODE 1 //yaw和pitch均采用陀螺仪模式
 
 //选择是哪个角
 #define YAW_ANGLE 1
@@ -36,14 +34,16 @@ extern "C" {
 //选择操作模式
 #define KEY_MODE 1
 #define RC_MODE 2
+#define AUTOAIM_MODE 3
 
 //算法选择
-#define NOMEL 1
-#define MATLAB 2
-#define SLIDE 3
+#define NORMAL 1 //普通PID
+#define MATLAB 2 //MATLAB PID
+#define SLIDE 3 //滑模控制
 
 //模式赋值
 // #define ZIYOU  1
+#define STOP 1 //急停
 #define SUIDONG  3
 #define TUOLUO  2
 #define SPIN 4
@@ -89,9 +89,9 @@ class gimbalc
 {
 public:
 	float Chassis_DifGain = 15, ChassisYawTarget = 104.0f, YawBias, vz;
-	float Pih_EcdUpLimit = 173, Pih_EcdLowLimit = 125, Pih_GyrUpLimit = 30, Pih_GyrLowLimit = -28;
+	float Pih_EcdUpLimit = 150, Pih_EcdLowLimit = 140, Pih_GyrUpLimit = 30, Pih_GyrLowLimit = -20;
 	float YawTarget,PihTarget;
-	int8_t fric_ram_status;
+	int8_t fric_ram_status, last_id,AutoAim;
 
 	void Printf_Test(void);
 	void ControlLoop(void);
@@ -118,11 +118,11 @@ public:
 	gimbalc();
 private:
 	bool CAN2_Status;
-	int8_t warning,Last_Warning,CarMode,Last_CarMode,is_online,Protect_flag,Last_ProtectFlag,Zimiao;
+	int8_t warning,Last_Warning,SportMode,Last_SportMode,is_online,Protect_flag,Last_ProtectFlag;
 	int8_t last_ID,lost_timer;
 
 	void Protect_Mode();
-	void CarChoose(int8_t mode);
+	void ParamChoose(int8_t mode);
 	void ChassisComLoop();
 	void AlgorithmCompute();
 	void SetWithRC(void);

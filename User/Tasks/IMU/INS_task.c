@@ -928,12 +928,12 @@ float IMU_Angle(int8_t Witch_angle)
 
 float Yaw_Speed, Pih_Speed;
 const fp32* Speed;
-float IMU_Speed(int8_t Witch_angle)
+float IMU_Speed(int8_t Which_angle)
 {
 	Speed = get_gyro_data_point();
 	Yaw_Speed = INS.Gyro[2] * 9.55f;
 	Pih_Speed = INS.Gyro[0] * 9.55f;
-	switch (Witch_angle)
+	switch (Which_angle)
 	{
 	case 1:
 		return Yaw_Speed;

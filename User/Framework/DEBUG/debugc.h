@@ -9,6 +9,7 @@
 #include "stdio.h"
 #include "stdarg.h"
 #include "stdint.h"
+#include "usartio.h"
 
 #define DEBUG_RVSIZE 255
 typedef struct {
@@ -59,5 +60,6 @@ typedef struct {
 //
 //};
 DebugParam Debug_Param();
-void usart_printf(const char *format, ...);
+//void usart_printf(const char *format, ...);
+
 #endif //ROBO_TEST_CORE_INC_UART8_H_

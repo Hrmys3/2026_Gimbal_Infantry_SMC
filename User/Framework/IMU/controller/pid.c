@@ -128,7 +128,7 @@ fp32 PID_calc(pid_type_def *pid, fp32 ref, fp32 set)
   * @param[out]     pid: PID结构数据指针
   * @retval         none
   */
-void PID_clear(pid_type_def *pid)
+void PID_clear(pid_type_def *pid) //没有用到
 {
     if (pid == NULL)
     {

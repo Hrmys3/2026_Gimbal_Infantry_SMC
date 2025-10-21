@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 #include "crc.h"
-
+#include "usartio.h"
 const uint16_t CRC16_INIT = 0xFFFF;
 
 const uint16_t W_CRC_TABLE[256] = {
@@ -36,19 +36,28 @@ const uint16_t W_CRC_TABLE[256] = {
   * @param[in] wCRC : CRC16 init value(default : 0xFFFF)
   * @return : CRC16 checksum
   */
+/**
+  * @brief CRC16计算函数
+  * @param pchMessage: 待计算CRC的数据指针
+  * @param dwLength: 数据长度（不包括CRC字段）
+  * @param wCRC: CRC初始值（通常使用CRC16_INIT）
+  * @return: 计算得到的CRC16校验值
+  */
 uint16_t Get_CRC16_Check_Sum(const uint8_t* pchMessage, uint32_t dwLength, uint16_t wCRC)
 {
-	uint8_t ch_data;
+	uint8_t ch_data;  // 临时变量，用于存储当前处理的字节
 
-	if (pchMessage == nullptr) return 0xFFFF;
+	if (pchMessage == nullptr) return 0xFFFF;  // 空指针检查
+
+	// 遍历所有数据字节
 	while (dwLength--)
 	{
-		ch_data = *pchMessage++;
-		(wCRC) =
-				((uint16_t)(wCRC) >> 8) ^ W_CRC_TABLE[((uint16_t)(wCRC) ^ (uint16_t)(ch_data)) & 0x00ff];
+		ch_data = *pchMessage++;  // 获取下一个字节
+		// 使用查找表更新CRC值
+		(wCRC) = ((uint16_t)(wCRC) >> 8) ^ W_CRC_TABLE[((uint16_t)(wCRC) ^ (uint16_t)(ch_data)) & 0x00ff];
 	}
 
-	return wCRC;
+	return wCRC;  // 返回计算得到的CRC值
 }
 
 /**
@@ -57,13 +66,23 @@ uint16_t Get_CRC16_Check_Sum(const uint8_t* pchMessage, uint32_t dwLength, uint1
   * @param[in] dwLength : Stream length = Data + checksum
   * @return : True or False (CRC Verify Result)
   */
+/**
+  * @brief CRC16验证函数
+  * @param pchMessage: 待验证的数据指针（包含CRC字段）
+  * @param dwLength: 数据总长度（包括CRC字段）
+  * @return: 验证结果（1-成功，0-失败）
+  */
 uint32_t Verify_CRC16_Check_Sum(const uint8_t* pchMessage, uint32_t dwLength)
 {
-	uint16_t w_expected = 0;
+	uint16_t w_expected = 0;  // 存储计算得到的CRC值
 
+	// 空指针和长度检查
 	if ((pchMessage == nullptr) || (dwLength <= 2)) return false;
 
+	// 计算数据的CRC值（排除最后2字节的CRC字段）
 	w_expected = Get_CRC16_Check_Sum(pchMessage, dwLength - 2, CRC16_INIT);
+
+	// 比较计算得到的CRC值与数据包中的CRC值
 	return (
 			(w_expected & 0xff) == pchMessage[dwLength - 2] &&
 					((w_expected >> 8) & 0xff) == pchMessage[dwLength - 1]);
@@ -75,14 +94,27 @@ uint32_t Verify_CRC16_Check_Sum(const uint8_t* pchMessage, uint32_t dwLength)
   * @param[in] dwLength : Stream length = Data + checksum
   * @return none
   */
+/**
+  * @brief 添加CRC16校验值到数据包末尾
+  * @param pchMessage: 数据指针（不包含CRC字段）
+  * @param dwLength: 数据总长度（包括将要添加的CRC字段）
+  * @return Nones
+  */
 void Append_CRC16_Check_Sum(uint8_t* pchMessage, uint32_t dwLength)
 {
-	uint16_t w_crc = 0;
+	uint16_t w_crc = 0;  // 存储计算得到的CRC值
 
+	// 空指针和长度检查
 	if ((pchMessage == nullptr) || (dwLength <= 2)) return;
 
+	// 计算数据的CRC值（排除最后2字节的CRC字段位置）
 	w_crc = Get_CRC16_Check_Sum(reinterpret_cast<uint8_t*>(pchMessage), dwLength - 2, CRC16_INIT);
-
-	pchMessage[dwLength - 2] = (uint8_t)(w_crc & 0x00ff);
-	pchMessage[dwLength - 1] = (uint8_t)((w_crc >> 8) & 0x00ff);
+	//验证crc校验值没出错
+	// usart_printf("%02x\r\n", w_crc);
+	// 将CRC值添加到数据包末尾（小端序）
+	pchMessage[dwLength - 2] = (uint8_t)(w_crc & 0x00ff);      // CRC低字节
+	pchMessage[dwLength - 1] = (uint8_t)((w_crc >> 8) & 0x00ff);  // CRC高字节
+	//验证放到末尾的过程没有出错
+	// usart_printf("%02x\r\n", pchMessage[dwLength - 1]);
+	// usart_printf("%02x\r\n", pchMessage[dwLength - 2]);
 }

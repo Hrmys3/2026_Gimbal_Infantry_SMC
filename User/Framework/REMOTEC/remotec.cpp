@@ -298,30 +298,34 @@ void remotec::portSetCarMode(void)
 	switch (Control_Mode)
 	{
 	case KEY_MODE:
-		if (rc_ctrl.key.V.Is_Click_Once && Last_CarMode == SUIDONG)
+		if (rc_ctrl.key.V.Is_Click_Once && Last_SportMode == SUIDONG)
 		{
-			CarMode = TUOLUO;
+			SportMode = TUOLUO;
 		}
-		else if (rc_ctrl.key.V.Is_Click_Once && Last_CarMode == TUOLUO)
+		else if (rc_ctrl.key.V.Is_Click_Once && Last_SportMode == TUOLUO)
 		{
-			CarMode = SUIDONG;
+			SportMode = SUIDONG;
 		}
-		else CarMode = Last_CarMode;
+		else SportMode = Last_SportMode;
 
 		break;
+
 	case RC_MODE:
 		switch (rc_ctrl.rc.mode_sw)
 		{
 		case 0:
-			CarMode = TUOLUO;
+			SportMode = TUOLUO;
 			break;
 		case 1:
-			CarMode = SUIDONG;
+			SportMode = SUIDONG;
+			break;
+		case 2:
+			SportMode = STOP;
 			break;
 		}
 		break;
 	}
-	Last_CarMode = CarMode;
+	Last_SportMode = SportMode;
 }
 
 void remotec::portSetProtect(void)
@@ -407,7 +411,7 @@ void remotec::Swich_ControlMode(void)
 	switch (rc_ctrl.rc.mode_sw)
 	{
 	case TOKEY:
-		Control_Mode = KEY_MODE;
+		//Control_Mode = KEY_MODE;
 		break;
 	default:
 		Control_Mode = RC_MODE;
