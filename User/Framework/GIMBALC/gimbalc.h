@@ -89,7 +89,7 @@ class gimbalc
 {
 public:
 	float Chassis_DifGain = 15, ChassisYawTarget = 104.0f, YawBias, vz;
-	float Pih_EcdUpLimit = 150, Pih_EcdLowLimit = 140, Pih_GyrUpLimit = 30, Pih_GyrLowLimit = -20;
+	float Pih_EcdUpLimit = 170, Pih_EcdLowLimit = 120, Pih_GyrUpLimit = 24, Pih_GyrLowLimit = -24;
 	float YawTarget,PihTarget;
 	int8_t fric_ram_status, last_id,AutoAim;
 

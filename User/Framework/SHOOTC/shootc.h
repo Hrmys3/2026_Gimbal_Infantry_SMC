@@ -17,6 +17,9 @@
 #define FRIC_L 1
 #define FRIC_R 2
 
+#define CONTINUOUS 1
+#define SINGLE 2
+
 class shootc
 {
  public:

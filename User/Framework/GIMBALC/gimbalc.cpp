@@ -367,7 +367,7 @@ void gimbalc::SetWithRC(void)
 
 		}
 		else {
-			YawTarget = vision_packet.offset_yaw + motors[0].Motor_Angle;
+			YawTarget = vision_packet.offset_yaw + motors[0].Motor_Angle + 2.0f;
 		}
 	}
 	else
@@ -463,8 +463,8 @@ void gimbalc::ControlLoop()
 void gimbalc::Printf_Test(void)
 {
 	//if (MyRemote.portIsZimiao() == 1) usart_printf("111\r\n");
-	//usart_printf("%.2f, %.2f, %.2f, %.2f\r\n", YawTarget, motors[0].Motor_Angle, YawTarget - motors[0].Motor_Angle,vision_packet.offset_yaw);
-	//usart_printf("%.2f %.2f %.2f\r\n",vision_packet.offset_pitch, last_offset_pitch, PihTarget);
+	//usart_printf("%.2f, %.2f, %.2f\r\n", vision_packet.offset_yaw, YawTarget, motors[0].Motor_Angle);
+	usart_printf("%.2f %.2f\r\n",vision_packet.offset_pitch, motors[1].Motor_Angle);
 	//usart_printf("%.2f\r\n",motors[1].Angle_Ecd);
 	//usart_printf("%d \r\n", MyRemote.rc_ctrl.rc.mode_sw);
 	//usart_printf("%d\r\n",MyRemote.rc_ctrl.rc.wheel);

@@ -88,13 +88,13 @@ void shootc::FricSpeedReset()
 void shootc::RamSpeedTarget(float Ram_Speed, int8_t mode) //bug:有时候目标值弹跳 已解决
 {
 	FricSpeedReset();
-	if (mode == 1) //连发模式，拨弹轮以一定速度旋转
+	if (mode == CONTINUOUS) //连发模式，拨弹轮以一定速度旋转
 	{
 		speed_pids[RAM].WorkType = Ramp_e;
 		speed_pids[RAM].Target = Ram_Speed;
 		rammer_flag = 0;
 	}
-	else if (mode == 2) //单发模式
+	else if (mode == SINGLE) //单发模式
 	{
 		if (rammer_flag == 0) //掉电初始时还是出现大幅度反转
 		{
@@ -111,7 +111,7 @@ void shootc::RamSpeedTarget(float Ram_Speed, int8_t mode) //bug:有时候目标�
 
 void shootc::Stuck_Check(void)
 {
-	int16_t Current = motors[0].Torque;
+	int16_t Current = motors[RAM].Torque;
 	// usart_printf("%d,%d\r\n", Current, stack_time);
 	if (Current > 5000) //堵转
 	{
@@ -121,7 +121,7 @@ void shootc::Stuck_Check(void)
 	{
 		ram_pos_pid.Err_all = 0;
 		ram_pos_pid.Err_all = 0;
-		RamSpeedTarget(-20, 1); //卡弹时以100rpm速度反转1s
+		RamSpeedTarget(-20, CONTINUOUS); //卡弹时以100rpm速度反转1s
 		reverse_time++;
 	}
 	if (reverse_time >= reverse_time_max)
