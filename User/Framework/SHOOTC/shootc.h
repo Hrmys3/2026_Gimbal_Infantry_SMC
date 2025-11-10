@@ -26,7 +26,7 @@ class shootc
 	void ControlLoop();
 	void SpeedClean();
 
-	int8_t rammer_flag, permit,Protect_flag;//连发慢速还是有点卡
+	int8_t rammer_flag, heat_permit, Protect_flag;//连发慢速还是有点卡
 	int16_t reverse_time_max = 80; //80*5ms
 
 	//遥控器相关
@@ -53,6 +53,7 @@ class shootc
 	void FricSpeedClean(void);
 	void FricSpeedReset();
 	void SetRammer(void);
+	bool isPermitted(void); //新增函数：是否准许发弹
  private:
 	int32_t zerobullettimer = 0;
 	float Heat_Cal;

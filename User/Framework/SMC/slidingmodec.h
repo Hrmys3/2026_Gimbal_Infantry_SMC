@@ -1,64 +1,65 @@
+//
+// Created by Hrmys3 on 2025/10/23.
+//
+
 #include "stm32f4xx_hal.h"
 #include "math.h"
-#ifndef _SMC_H_
-#define _SMC_H_
-/*
-Õë¶Ô2½×ÏµÍ³
-²Î¿¼Á´½Ó£º
-·ÇÏßĞÔÏµÍ³£¨Ê®Èı£©»¬Ä£¿ØÖÆ½âÎö - Chenglin LiµÄÎÄÕÂ - Öªºõ
-https://zhuanlan.zhihu.com/p/138860110
-·ÇÏßĞÔÏµÍ³£¨Ê®ËÄ£©»¬Ä£¿ØÖÆÆ÷Éè¼ÆÁ÷³Ì - Chenglin LiµÄÎÄÕÂ - Öªºõ
-https://zhuanlan.zhihu.com/p/139066859
-*/
+#ifndef SMC_H
+#define SMC_H
 
 class SMC{
- public:
-	float C;
-	float K;
-	float ref; //³õÊ¼Ä¿±êÖµ
-	float error_eps;//Îó²îÏÂÏŞ
-	uint16_t p; //ÕıÆæÊı
-	uint16_t q; //ÕıÆæÊı
-	float u_max;//Êä³ö×î´óÖµ
-	float J;//¹À¼Æ¹ßÁ¿
-	float angle; //½Ç¶È·´À¡£¬¡ã
-	float ang_vel;//½ÇËÙ¶È·´À¡£¬¡ã/s
-	float epsilon;
+public:
+    float alpha; //æ–°å¢NFTSMCçš„çº¿æ€§é¡¹ç³»æ•°alphaï¼Œè¿™é‡Œç®€å†™ä¸ºa
+    float beta;
+    float gamma; //æ–°å¢ï¼Œä½œä¸ºé€Ÿåº¦ä¿®æ­£é‡ gamma (e_dot é¡¹)
+    float K;
+    float ref;
+    float error_eps;
+    uint16_t p;
+    uint16_t q;
+    float u_max;
+    float J;
+    float angle;
+    float ang_vel;
+    float epsilon;
 
-	float u;
-	//³õÊ¼»¯ÁĞ±í
-	SMC(float C,float K,float ref,float error_eps,uint16_t p,uint16_t q,float u_max,float J,float epsilon):
-	C(C),K(K),ref(ref),error_eps(error_eps),p(p),q(q),u_max(u_max),J(J),epsilon(epsilon){};
-	//¸üĞÂº¯Êı
-	void SMC_Tick(float angle_now,float angle_vel);
+    float u;
+    SMC(float alpha, float beta,float gamma,float K,float ref,float error_eps,uint16_t p,uint16_t q,float u_max,float J,float epsilon):
+    alpha(alpha),beta(beta),gamma(gamma),K(K),ref(ref),error_eps(error_eps),p(p),q(q),u_max(u_max),J(J),epsilon(epsilon){};
+    //æ„é€ å‡½æ•°ä¸­å¢åŠ alpha å’Œ K_gammaï¼Œå¿…é¡»ç¡®ä¿1<p/q<2
 
- private:
-	float error;
-	float error_last;
-	float dref;//Ä¿±êÖµÒ»½×µ¼
-	float ddref;//Ä¿±êÖµ¶ş½×µ¼
-	float refl;//ÉÏÒ»´ÎµÄÄ¿±êÖµ
+    void SMC_Tick(float angle_now,float angle_vel);
 
-	float s;//»¬Ä£Ãæ
-	float ds;//»¬Ä£ÃæµÄÒ»½×µ¼
-	// ±¥ºÍº¯Êı
-	float Sat(float y)
-	{
-		if (fabs(y) <= 1)
-			return y;
-		else
-			return Signal(y);
-	}
-	// ·ûºÅº¯Êı,ÈôÓĞ¶¶¶¯¿ÉÒÔ»»¸ö¶¸ÇÍµÄ±¥ºÍº¯Êı
-	int8_t Signal(float y)
-	{
-		if (y > 0)
-			return 1;
-		else if (y == 0)
-			return 0;
-		else
-			return -1;
-	}
+//private: //ä¸ºäº†æµ‹è¯•ï¼Œå…ˆæ”¹æˆpublic
+    float e;
+    float error_last;
+    float e_dot_pq;
+    float ref_dot;
+    float ref_ddot;
+    float ref_last;
+    //const float delta = 0.001f; //NFTSMCæ–°å¢ï¼Œç”¨äºå¤„ç†e_dot=0å¥‡å¼‚ç‚¹ï¼ŒåŠ å…¥é€Ÿåº¦ä¿®æ­£é‡ä¹‹åä¸éœ€è¦
+
+    float s;
+    float ds;
+
+    float Sat(float y)
+    {
+        if (fabs(y) < 1 || fabs(y) == 1)
+            return y;
+        else
+            return Signal(y);
+    }
+
+    int8_t Signal(float y)
+    {
+        if (y > 0)
+            return 1;
+        else if (y == 0)
+            return 0;
+        else
+            return -1;
+    }
 };
 //extern SMC YawSMC;
-#endif
+
+#endif //SMC_H

@@ -51,7 +51,7 @@ void gimbalc::ParamChoose(int8_t mode)
 	{
 		case KEY_MODE: //键盘模式
 		{
-			YawSMC.C = 25;
+			YawSMC.beta = 25;
 			YawSMC.K = 140;
 
 			Pid_In.PihP_P = 1.8;
@@ -70,8 +70,11 @@ void gimbalc::ParamChoose(int8_t mode)
 
 		case RC_MODE: //遥控器模式
 		{
-			YawSMC.C = 25; //23
-			YawSMC.K = 170; //160
+			YawSMC.alpha = 125;//120左右？
+			YawSMC.beta = 24; //23
+			//YawSMC.gamma = 0.001;
+			YawSMC.K = 120; //160
+			YawSMC.epsilon = 1;
 
 			Pid_In.PihP_P = 2.5;
 			Pid_In.PihP_I = 0;
@@ -89,8 +92,11 @@ void gimbalc::ParamChoose(int8_t mode)
 
 		case AUTOAIM_MODE: //自瞄模式
 		{
-			YawSMC.C = 12;
-			YawSMC.K = 120;
+			YawSMC.alpha = 200; //117 90不抖
+			YawSMC.beta = 10;//13
+			YawSMC.K = 120; //120 50不抖
+			YawSMC.gamma = 0.005; //0.001
+			///远处高速移动抖振严重
 
 			Pid_In.PihP_P = 1.0;
 			Pid_In.PihP_I = 0;
@@ -134,6 +140,10 @@ void gimbalc::AlgorithmCompute()
 
 	//滑模控制
 	YawSMC.SMC_Tick(motors[0].Motor_Angle, motors[0].Motor_Speed * 5.99f);
+	//新增小陀螺模式下的前馈控制
+	// if (MotionMode == TUOLUO) {
+	// 	YawSMC.u += motors[0].Motor_Speed * 100.0;
+	// }
 
 	//Matlab的PID
 	Pid_In.YawAngle_Now = motors[0].Motor_Angle;
@@ -184,7 +194,7 @@ void gimbalc::Yaw_EcdClean(void) //无问题
 
 void gimbalc::Protect_Mode()
 {
-	if(!motors[0].is_online || !motors[1].is_online || IS_IMU_OK == 0 || !MyRemote.is_online || SportMode == STOP)
+	if(!motors[0].is_online || !motors[1].is_online || IS_IMU_OK == 0 || !MyRemote.is_online || MotionMode == STOP)
 	{
 		Protect_flag = OFFLINE;
 	}
@@ -199,7 +209,7 @@ void gimbalc::Protect_Mode()
 		{
 			fric_ram_status = OPENRAMMER;
 			warning = OPENFRIC;
-			MyRemote.Last_ProtectMode = OPENFRIC;
+			MyRemote.Last_FricMode = OPENFRIC;
 		}
 
 		switch (warning)
@@ -247,8 +257,8 @@ void gimbalc::Protect_Mode()
 		can.PitchSendCurrent(0);
 
 		fric_ram_status = CLOSERAMMER;
-		SportMode = SUIDONG;
-		Last_SportMode = SUIDONG;
+		MotionMode = SUIDONG;
+		Last_MotionMode = SUIDONG;
 		ChassisYawPid.Err_all = 0;
 	}
 	Last_Warning = warning;
@@ -274,7 +284,7 @@ void gimbalc::ChassisComLoop()
 		CAN2_Status = 1;
 		break;
 	case 1:
-		can.ChassisSendGimbalStatus(-(motors[0].Angle_Ecd - YawBias), 0, Servo_GetStatus(), shoot.GetFricStatus() & shoot.motors[1].is_online & shoot.motors[2].is_online, fric_ram_status & shoot.permit, MyRemote.portIsRedrawing());//累计误差消除  portIsToSentry()机间通信没用
+		can.ChassisSendGimbalStatus(-(motors[0].Angle_Ecd - YawBias), 0, Servo_GetStatus(), shoot.GetFricStatus() & shoot.motors[1].is_online & shoot.motors[2].is_online, fric_ram_status & shoot.heat_permit, MyRemote.portIsRedrawing());//累计误差消除  portIsToSentry()机间通信没用
 		CAN2_Status = 0;
 		break;
 	}
@@ -284,9 +294,9 @@ void gimbalc::SetWithRC(void)
 {
 	MyRemote.update();
 
-	SportMode =  MyRemote.SportMode;
+	MotionMode =  MyRemote.MotionMode;
 
-	warning = MyRemote.ProtectMode;
+	warning = MyRemote.FricMode;
 	AutoAim = MyRemote.portIsZimiao(); //暫時不改
 
 	vz = -ChassisYawPid.Out;
@@ -312,7 +322,7 @@ void gimbalc::SetWithRC(void)
 					// if(vision_packet.offset_yaw<-284) vision_packet.offset_yaw += 360;
 
 					//上位机给出角度偏移过大时，视为发生错误，不执行旋转
-					if (abs(vision_packet.offset_pitch ) > 20 || abs(vision_packet.offset_yaw) > 50)
+					if (abs(motors[1].Motor_Angle - vision_packet.auto_pitch_target ) > 20 || abs(motors[0].Motor_Angle - vision_packet.auto_yaw_target) > 50)
 					{
 
 					}
@@ -320,8 +330,8 @@ void gimbalc::SetWithRC(void)
 					else //上位机给出数据正确
 					{
 						//目标角度设置为 当前角度+上位机给的偏移量
-						YawTarget = vision_packet.offset_yaw + motors[0].Motor_Angle ;
-						PihTarget = vision_packet.offset_pitch + motors[1].Motor_Angle  ;
+						YawTarget = vision_packet.auto_yaw_target;
+						PihTarget = vision_packet.auto_pitch_target;
 					}
 					last_id = vision_packet.id ;
 				}
@@ -351,23 +361,23 @@ void gimbalc::SetWithRC(void)
 	//不同操作模式的参数选择
 	if (AutoAim == 0)
 	{
-		if(MyRemote.Control_Mode == KEY_MODE) ParamChoose(KEY_MODE);
+		if(MyRemote.ControlMode == KEY_MODE) ParamChoose(KEY_MODE);
 		else ParamChoose(RC_MODE);
 	}
 	else ParamChoose(AUTOAIM_MODE);
 
 	//自瞄同时小陀螺时，调整控制逻辑和参数
 	// if(CarMode == TUOLUO && Zimiao == 1) YawMotorAllAngel.Algorithml = NOMEL;
-	if(SportMode == TUOLUO && AutoAim == 1)
+	if(MotionMode == SPIN && AutoAim == 1)
 	{
 //		YawMotorAllAngel.Algorithml = SLIDE;
 		YawSMC.J =0.74;
-		YawSMC.C = 10;
+		YawSMC.beta = 10;
 		if (vision_packet.control == 0) { //上位机没有检测到装甲板
 
 		}
 		else {
-			YawTarget = vision_packet.offset_yaw + motors[0].Motor_Angle + 2.0f;
+			YawTarget = vision_packet.auto_yaw_target+ motors[0].Speed_Ecd * 0.025;// + 2.0f; //此补偿值由滑模控制时的前馈注入实现
 		}
 	}
 	else
@@ -377,11 +387,11 @@ void gimbalc::SetWithRC(void)
 	}
 
 	//切换不同的运动模式
-	switch (SportMode)
+	switch (MotionMode)
 	{
 	default://随动
 	{
-		if (Last_SportMode != SUIDONG)
+		if (Last_MotionMode != SUIDONG)
 		{
 			Yaw_EcdClean();
 		}
@@ -390,7 +400,7 @@ void gimbalc::SetWithRC(void)
 		ChassisYawPid.Target = ChassisYawTarget; //YAW_Bias
 		break;
 	}
-	case TUOLUO: //小陀螺模式
+	case SPIN: //小陀螺模式
 	{
 		Yaw_EcdClean();
 		vz = -50.0f; //恒速小陀螺
@@ -408,7 +418,7 @@ void gimbalc::SetWithRC(void)
 
 		YawSMC.ref = YawTarget;
 	}
-	Last_SportMode = SportMode;
+	Last_MotionMode = MotionMode;
 	if (MyRemote.rc_ctrl.key.SHIFT.Now_State && vz != -ChassisYawPid.Out) vz = vz * 2.5	; //是否需要分段？ 还是按键定模式
 }
 
@@ -464,7 +474,10 @@ void gimbalc::Printf_Test(void)
 {
 	//if (MyRemote.portIsZimiao() == 1) usart_printf("111\r\n");
 	//usart_printf("%.2f, %.2f, %.2f\r\n", vision_packet.offset_yaw, YawTarget, motors[0].Motor_Angle);
-	usart_printf("%.2f %.2f\r\n",vision_packet.offset_pitch, motors[1].Motor_Angle);
+	//usart_printf("%.2f %.2f\r\n",vision_packet.offset_pitch, motors[1].Motor_Angle);
+	//usart_printf("%.2f, %.2f, %.2f, %.2f \r\n",YawTarget, motors[0].Motor_Angle,YawTarget-motors[0].Motor_Angle, vision_packet.offset_yaw );
+	//usart_printf("%.2f, %.2f, %.2f\r\n", 125*YawSMC.error, 24 * YawSMC.e_dot_pq, 0.001*(YawSMC.ang_vel - YawSMC.dref));
+	usart_printf("%.2f\r\n",YawSMC.e);
 	//usart_printf("%.2f\r\n",motors[1].Angle_Ecd);
 	//usart_printf("%d \r\n", MyRemote.rc_ctrl.rc.mode_sw);
 	//usart_printf("%d\r\n",MyRemote.rc_ctrl.rc.wheel);

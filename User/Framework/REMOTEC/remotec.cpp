@@ -230,7 +230,7 @@ void remotec::portHandle(Key_State* port)
 
 void remotec::portSetYawSpeed(void)
 {
-	switch (Control_Mode)
+	switch (ControlMode)
 	{
 	case KEY_MODE:
 		if (abs(rc_ctrl.mouse.x) < 50)
@@ -247,7 +247,7 @@ void remotec::portSetYawSpeed(void)
 
 void remotec::portSetPihSpeed(void)
 {
-	switch (Control_Mode)
+	switch (ControlMode)
 	{
 	case KEY_MODE:
 		if (abs(rc_ctrl.mouse.y) < 50)
@@ -263,7 +263,7 @@ void remotec::portSetPihSpeed(void)
 
 void remotec::portSetVx(void)
 {
-	switch (Control_Mode)
+	switch (ControlMode)
 	{
 	case KEY_MODE:
 		vx = (rc_ctrl.key.D - rc_ctrl.key.A) * 80.0; //这儿后期加等级分档位
@@ -278,7 +278,7 @@ void remotec::portSetVx(void)
 
 void remotec::portSetVy(void)
 {
-	switch (Control_Mode)
+	switch (ControlMode)
 	{
 	case KEY_MODE:
 		vy = (rc_ctrl.key.W - rc_ctrl.key.S) * 80.0;
@@ -295,18 +295,18 @@ void remotec::portSetCarMode(void)
 {
 	portHandle(&rc_ctrl.key.V);
 	portHandle(&rc_ctrl.key.F);
-	switch (Control_Mode)
+	switch (ControlMode)
 	{
 	case KEY_MODE:
-		if (rc_ctrl.key.V.Is_Click_Once && Last_SportMode == SUIDONG)
+		if (rc_ctrl.key.V.Is_Click_Once && Last_MotionMode == SUIDONG)
 		{
-			SportMode = TUOLUO;
+			MotionMode = SPIN;
 		}
-		else if (rc_ctrl.key.V.Is_Click_Once && Last_SportMode == TUOLUO)
+		else if (rc_ctrl.key.V.Is_Click_Once && Last_MotionMode == SPIN)
 		{
-			SportMode = SUIDONG;
+			MotionMode = SUIDONG;
 		}
-		else SportMode = Last_SportMode;
+		else MotionMode = Last_MotionMode;
 
 		break;
 
@@ -314,51 +314,51 @@ void remotec::portSetCarMode(void)
 		switch (rc_ctrl.rc.mode_sw)
 		{
 		case 0:
-			SportMode = TUOLUO;
+			MotionMode = SPIN;
 			break;
 		case 1:
-			SportMode = SUIDONG;
+			MotionMode = SUIDONG;
 			break;
 		case 2:
-			SportMode = STOP;
+			MotionMode = STOP;
 			break;
 		}
 		break;
 	}
-	Last_SportMode = SportMode;
+	Last_MotionMode = MotionMode;
 }
 
 void remotec::portSetProtect(void)
 {
 	portHandle(&rc_ctrl.key.G);
 	portHandle(&rc_ctrl.key.F);
-	switch (Control_Mode)
+	switch (ControlMode)
 	{
 	case KEY_MODE:
-		if (rc_ctrl.key.G.Is_Click_Once && Last_ProtectMode != OPENFRIC)
+		if (rc_ctrl.key.G.Is_Click_Once && Last_FricMode != OPENFRIC)
 		{
-			ProtectMode = OPENFRIC;
+			FricMode = OPENFRIC;
 		}
-		else if (rc_ctrl.key.G.Is_Click_Once && Last_ProtectMode != CLOSEFRIC)
+		else if (rc_ctrl.key.G.Is_Click_Once && Last_FricMode != CLOSEFRIC)
 		{
-			ProtectMode = CLOSEFRIC;
+			FricMode = CLOSEFRIC;
 		}
-		else ProtectMode = Last_ProtectMode;
+		else FricMode = Last_FricMode;
 
 		break;
 	case RC_MODE:
 		if(rc_ctrl.rc.shutter)
-			ProtectMode = OPENFRIC;
+			FricMode = OPENFRIC;
 		else
-			ProtectMode = CLOSEFRIC;
+			FricMode = CLOSEFRIC;
 		break;
 	}
-	Last_ProtectMode = ProtectMode;
+	Last_FricMode = FricMode;
 }
 
 uint8_t remotec::portIsZimiao(void)
 {
-	switch (Control_Mode)
+	switch (ControlMode)
 	{
 		case RC_MODE:
 		{
@@ -414,7 +414,7 @@ void remotec::Swich_ControlMode(void)
 		//Control_Mode = KEY_MODE;
 		break;
 	default:
-		Control_Mode = RC_MODE;
+		ControlMode = RC_MODE;
 		break;
 	}
 }

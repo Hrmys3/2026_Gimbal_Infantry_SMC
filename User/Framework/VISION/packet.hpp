@@ -14,8 +14,8 @@ struct __attribute__((packed)) ReceivePacket {
 	uint8_t head[2] = {'E', 'G'};        // 数据包头，用于标识数据包开始
 	uint8_t control;                     // 控制指令（如自瞄开关、小陀螺模式等）
 	uint8_t shoot;                       // 射击指令（0-不射击，1-射击）
-	float offset_yaw;                  // 目标yaw角度（单位：0.01度）
-	float offset_pitch;                // 目标pitch角度（单位：0.01度）
+	float auto_yaw_target;                  // 目标yaw角度（单位：0.01度）
+	float auto_pitch_target;                // 目标pitch角度（单位：0.01度）
 	float horizon_distance;            // 目标水平距离（单位：cm）
 	uint8_t id;                        //packet_id，自增，用来标记小电脑发来的数据
 	uint16_t crc16;                      // CRC16校验值，用于验证数据完整性

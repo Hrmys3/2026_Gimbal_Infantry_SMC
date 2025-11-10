@@ -51,7 +51,7 @@ typedef __packed struct
 	uint8_t Last_State: 1;
 	uint8_t Now_State: 1;
 	uint8_t Is_Click_Once: 1;
-} Key_State;
+} Key_State; //键盘上任意一个按键的状态
 
 typedef __packed struct
 {
@@ -119,7 +119,7 @@ class remotec {
 	//遥控控制变量
 	RC_ctrl_t rc_ctrl;
 	uint32_t RC_GetNewData = 0;//检测键值是否在发送/更新
-	uint8_t Control_Mode = RC_MODE; //一般默认遥控器控制
+	uint8_t ControlMode = RC_MODE; //一般默认遥控器控制
 	bool is_online = 0;
 
 	void RC_DataHandle();
@@ -129,10 +129,10 @@ class remotec {
 	float vx = 0;
 	float vy = 0;
 //	float vz = 0;
-	int8_t SportMode;
-	int8_t Last_SportMode = SUIDONG;
-	int8_t ProtectMode ;
-	int8_t Last_ProtectMode = OPENFRIC;
+	int8_t MotionMode;
+	int8_t Last_MotionMode = SUIDONG;
+	int8_t FricMode ;
+	int8_t Last_FricMode = OPENFRIC;
 
 	uint8_t portIsZimiao(void);
 	uint8_t portIsRedrawing(void);

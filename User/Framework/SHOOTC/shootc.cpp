@@ -163,11 +163,11 @@ void shootc::SetRammer(void)
 	int16_t RammerSpeed = 10;
 	Channel_Max = 120.0f; //最大拨弹速度-遥控器
 
-	switch (MyRemote.Control_Mode)
+	switch (MyRemote.ControlMode)
 	{
 	case KEY_MODE:
 	{
-		if ( permit && GetFricStatus() && motors[1].is_online && motors[2].is_online && omni.fric_ram_status == OPENRAMMER)
+		if (isPermitted())
 		{
 			speed_pids[RAM].WorkType = Ramp_e;
 			speed_pids[RAM].Target = ram_pos_pid.Out;
@@ -211,7 +211,7 @@ void shootc::SetRammer(void)
 	}
 	case RC_MODE:
 	{
-		if (permit & GetFricStatus() && motors[1].is_online && motors[2].is_online && omni.fric_ram_status == OPENRAMMER)
+		if (isPermitted())
 		{
 			speed_pids[RAM].WorkType = Ramp_e;
 			speed_pids[RAM].Target = ram_pos_pid.Out;
@@ -228,7 +228,7 @@ void shootc::SetRammer(void)
 			if (Channel_Now == Channel_Max && Channel_Last != Channel_Max)
 			{
 				// ShootSpeedTarget(SHOOT_SPEED, -RammerSpeed, 2);
-				RamSpeedTarget(RammerSpeed, 2);
+				RamSpeedTarget(RammerSpeed, SINGLE);
 			}
 
 			motors[RAM].update_angle();
@@ -240,7 +240,7 @@ void shootc::SetRammer(void)
 				if (Channel_StopTime++ >= Channel_StopTimeMax) //速度环正常 英雄：1000000  步兵：50
 				{
 					RammerSpeed = Channel_Now;
-					RamSpeedTarget(RammerSpeed, 1);
+					RamSpeedTarget(RammerSpeed, CONTINUOUS);
 				}
 			}
 			else Channel_StopTime = 0;
@@ -249,7 +249,7 @@ void shootc::SetRammer(void)
 		else
 		{
 			RammerSpeedClean();
-			RamSpeedTarget(0, 1);
+			RamSpeedTarget(0, CONTINUOUS);
 			shoot.speed_pids[RAM].Out = 0;
 		}
 		break;
@@ -287,10 +287,24 @@ void shootc::Heat_Protect(void)
 
 	if (Heat_Cal > judge.cool_limit - 30)
 	{
-		permit = FORBID; //即将超热量，不允许发弹
+		heat_permit = FORBID; //即将超热量，不允许发弹
 	}
-	else permit = PERMIT;
+	else heat_permit = PERMIT;
 }
+
+bool shootc::isPermitted() {
+	if (heat_permit && GetFricStatus() && motors[1].is_online && motors[2].is_online && omni.fric_ram_status == OPENRAMMER) {
+		//自瞄模式下，需要上位机发来shoot=1的允许指令
+		if (omni.AutoAim) {
+			if (vision_packet.shoot) return PERMIT;
+		}
+
+		//非自瞄模式
+		else return PERMIT;
+	}
+	else return FORBID;
+}
+
 
 void shootc::ControlLoop(void) //发弹主循环：模式切换和速率测试
 {

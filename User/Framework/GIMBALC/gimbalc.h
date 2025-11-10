@@ -45,7 +45,7 @@ extern "C" {
 // #define ZIYOU  1
 #define STOP 1 //急停
 #define SUIDONG  3
-#define TUOLUO  2
+#define SPIN  2
 #define SPIN 4
 #define CAR_PROTECT 5
 #define RC_OFFLINE 6
@@ -61,7 +61,7 @@ extern "C" {
 //摩擦轮状态
 #define CLOSERAMMER 0
 #define OPENRAMMER 1
-#define CRAZYRAMMER 2
+#define CRAZYRAMMER 2 //这是啥呀
 
 //舵机状态
 #define SERVO_OFF 0
@@ -91,7 +91,8 @@ public:
 	float Chassis_DifGain = 15, ChassisYawTarget = 104.0f, YawBias, vz;
 	float Pih_EcdUpLimit = 170, Pih_EcdLowLimit = 120, Pih_GyrUpLimit = 24, Pih_GyrLowLimit = -24;
 	float YawTarget,PihTarget;
-	int8_t fric_ram_status, last_id,AutoAim;
+	// float Yaw_Feedforward_Bias = 100.0f; // 【新增】Yaw 轴前馈偏置，用于补偿小陀螺恒速旋转
+	int8_t fric_ram_status, last_id, AutoAim;
 
 	void Printf_Test(void);
 	void ControlLoop(void);
@@ -114,11 +115,17 @@ public:
 	};
 	NormalPID ChassisYawPid{0.6,0.0,0.2,1000};
 // 	SMC
-	SMC YawSMC{20, 150, 0, 0.01, 21, 27, 16384, 0.7, 1};
+	//原SMC YawSMC{20, 150, 0, 0.01, 21, 27, 16384, 0.7, 1};
+	//各参数含义：SMC(float alpha, float C,float K_gamma,float K,float ref,float error_eps,uint16_t p,uint16_t q,float u_max,float J,float epsilon)
+	SMC YawSMC{120.0, 20, 0.001, 230, 0, 0.01, 21, 27, 16384, 0.7, 1};
+	//老SMC：SMC YawSMC{20, 150, 0, 0.01, 21, 27, 16384, 0.7, 1};
 	gimbalc();
+	/*
+	 * p/q范围重新确定：原本<1较稳定，后改成1-2不稳定。可以考虑分段讨论？
+	 */
 private:
 	bool CAN2_Status;
-	int8_t warning,Last_Warning,SportMode,Last_SportMode,is_online,Protect_flag,Last_ProtectFlag;
+	int8_t warning,Last_Warning,MotionMode,Last_MotionMode,is_online,Protect_flag,Last_ProtectFlag;
 	int8_t last_ID,lost_timer;
 
 	void Protect_Mode();
