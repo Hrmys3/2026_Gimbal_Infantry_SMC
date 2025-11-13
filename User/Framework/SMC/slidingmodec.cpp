@@ -29,7 +29,7 @@ void SMC::SMC_Tick(float angle_now,float angle_vel)
 		// error_dot = ang_vel - target_dot + spin_bias;
 
 	}
-	usart_printf("%.3f, %.3f\r\n", ang_vel, spin_bias);
+	// usart_printf("%.3f, %.3f\r\n", ang_vel, spin_bias);
 
 	if (fabs(error) < error_eps)
 	{

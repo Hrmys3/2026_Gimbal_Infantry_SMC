@@ -472,7 +472,7 @@ void gimbalc::Printf_Test(void)
 	// usart_printf("%d\r\n",MyRemote.rc_ctrl.rc.ch[0]);
 	// usart_printf("%f\r\n",Pid_Out.PihCurrent);
 	//usart_printf("%.2f %.2f %.2f %.2f\r\n",motors[0].Angle_Ecd, motors[0].Angle_Imu, INS.Yaw, INS.YawTotalAngle);
-	// usart_printf("%f,%f,%f,%f,%d,%d\r\n",motors[0].Angel_All,motors[1].Angel_All,motors[0].Motor_Speed,motors[1].Motor_Speed,motors[0].is_online,motors[1].is_online);
+	usart_printf("%f,%f,%f,%f,%d,%d\r\n",motors[0].Angle_Imu,motors[1].Angle_Imu,motors[0].Motor_Speed,motors[1].Motor_Speed,motors[0].is_online,motors[1].is_online);
 } //放一些常用的打印
 
 //以下是改变随动方向的函数接口
