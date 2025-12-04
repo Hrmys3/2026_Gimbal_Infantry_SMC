@@ -70,11 +70,11 @@ void gimbalc::ParamChoose(int8_t mode)
 
 		case RC_MODE: //遥控器模式
 		{
-			YawSMC.alpha = 125;//120左右？
-			YawSMC.beta = 24; //23
-			//YawSMC.gamma = 0.001;
-			YawSMC.K = 120; //160
-			YawSMC.epsilon = 1;
+			// YawSMC.alpha = 125;//120左右？
+			// YawSMC.beta = 24; //23
+			// //YawSMC.gamma = 0.001;
+			// YawSMC.K = 120; //160
+			// // YawSMC.epsilon = 1;
 
 			Pid_In.PihP_P = 2.5;
 			Pid_In.PihP_I = 0;
@@ -139,7 +139,7 @@ void gimbalc::AlgorithmCompute()
 	speed_pid[1].GetOutput();
 
 	//滑模控制
-	YawSMC.SMC_Tick(motors[0].Motor_Angle, motors[0].Motor_Speed * 5.99f);
+	YawSMC.SMC_Tick(motors[0].Motor_Angle, motors[0].Motor_Speed * 5.99f, 0); //为什么要乘5.99？
 	//新增小陀螺模式下的前馈控制
 	// if (MotionMode == TUOLUO) {
 	// 	YawSMC.u += motors[0].Motor_Speed * 100.0;
@@ -477,7 +477,7 @@ void gimbalc::Printf_Test(void)
 	//usart_printf("%.2f %.2f\r\n",vision_packet.offset_pitch, motors[1].Motor_Angle);
 	//usart_printf("%.2f, %.2f, %.2f, %.2f \r\n",YawTarget, motors[0].Motor_Angle,YawTarget-motors[0].Motor_Angle, vision_packet.offset_yaw );
 	//usart_printf("%.2f, %.2f, %.2f\r\n", 125*YawSMC.error, 24 * YawSMC.e_dot_pq, 0.001*(YawSMC.ang_vel - YawSMC.dref));
-	usart_printf("%.2f\r\n",YawSMC.e);
+	usart_printf("%.1f, %.1f, %.1f, %.1f\r\n",YawSMC.get_e(),YawSMC.get_e_dot(),YawSMC.get_s(),YawSMC.u);
 	//usart_printf("%.2f\r\n",motors[1].Angle_Ecd);
 	//usart_printf("%d \r\n", MyRemote.rc_ctrl.rc.mode_sw);
 	//usart_printf("%d\r\n",MyRemote.rc_ctrl.rc.wheel);

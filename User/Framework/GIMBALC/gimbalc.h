@@ -117,8 +117,13 @@ public:
 // 	SMC
 	//原SMC YawSMC{20, 150, 0, 0.01, 21, 27, 16384, 0.7, 1};
 	//各参数含义：SMC(float alpha, float C,float K_gamma,float K,float ref,float error_eps,uint16_t p,uint16_t q,float u_max,float J,float epsilon)
-	SMC YawSMC{120.0, 20, 0.001, 230, 0, 0.01, 21, 27, 16384, 0.7, 1};
+	SMC YawSMC{30, 0, 1/*0.001*/, 230/*230*/, 0, 0.01, 27, 21, 16384, 0.7, 0.1, 0.0051, 0.8/*0.8*/, 0.1, 0.0};
+	//2版SMC YawSMC{120.0, 20, 0.001, 230, 0, 0.01, 21, 27, 16384, 0.7, 1};
 	//老SMC：SMC YawSMC{20, 150, 0, 0.01, 21, 27, 16384, 0.7, 1};
+	/*
+	 * 改参数日志
+	 *
+	 */
 	gimbalc();
 	/*
 	 * p/q范围重新确定：原本<1较稳定，后改成1-2不稳定。可以考虑分段讨论？
