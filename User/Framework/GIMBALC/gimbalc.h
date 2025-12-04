@@ -38,7 +38,7 @@ extern "C" {
 
 //算法选择
 #define NORMAL 1 //普通PID
-#define MATLAB 2 //MATLAB PID
+#define MATLAB_PID 2 //MATLAB PID
 #define SLIDE 3 //滑模控制
 
 //模式赋值
@@ -100,7 +100,7 @@ public:
 	Motor motors[2]
 	{
 		{GYR_MODE,SLIDE,&hcan2,1.0,8192.0f,1,CAN_YAW_RCV_ID},
-		{GYR_MODE,MATLAB,&hcan1,1.0,8192.0f,-1,CAN_PIH_RCV_ID},
+		{GYR_MODE,MATLAB_PID,&hcan1,1.0,8192.0f,-1,CAN_PIH_RCV_ID},
 	};
 //	NormalPID
 	NormalPID pos_pid[2]
